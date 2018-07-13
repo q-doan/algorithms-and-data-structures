@@ -1,4 +1,4 @@
-# Suffix Tree - Cây hậu tố
+# Cây hậu tố - Suffix Tree
 ## I. Giới thiệu cây hậu tố
 
 ### 1. Bài toán cần giải quyết.
