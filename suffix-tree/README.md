@@ -38,10 +38,91 @@ Khi đem tất cả bỏ vào một *trie* thường ta sẽ được:
 ![Banana in standard trie](banana-standard-trie.png)
 
 Và nếu rút gọn *trie* trên, cấu trúc mới sẽ ít tốn không gian hơn.
-![banana in compressed trie](banana-compressed-trie.png)
+![Banana in compressed trie](banana-compressed-trie.png)
+
+Đến đây ta có thể dễ dàng hình dung hơn cây hậu tố là như thế nào rồi. Xin chú ý là phần giới thiệu này chỉ đang xây dựng cây hậu tố bằng tay, cụ thể cách để xây dựng cây hậu tố thế nào thì sẽ được trình bày ở phần sau.
+
+Giờ lại nảy ra câu hỏi là giả sử ta có cây hậu tố rồi thì sẽ sử dụng nó như thế nào cho bài toán đặt ra? Rất đơn giản! Nó không khác với trie là mấy. Với mỗi một chuỗi *pattern* bạn sẽ bắt đầu đi từ gốc của cây hậu tố, duyệt qua từng cạnh tương ứng với từng ký tự của *pattern*. Nếu ta không dò được cạnh để đi thì có nghĩa là chuỗi *pattern* không xuất hiện trong *text*. Nếu ta có thể duyệt qua hết tất cả các ký tự của *pattern* thì *pattern* đã xuất hiện đâu đó trong *text*.
+
+Để dễ hình dung, giả sử biết chuỗi `nan` có xuất hiện trong `banana` hay không. Ta sẽ duyệt theo đường màu đó của hình sau:
+![Banana search nan](banana-suffix-search.png)
+Đây chỉ là bài toán kinh điển cho cây hậu tố. Sẽ còn nhiều ứng dụng thú vị khác sẽ được trình bày ở phần 3.
+
 
 ## 2. Ứng dụng suffix tree
+
+Cây hậu tố rất hữu ích trong xử lý chuỗi và nhiều bài toán trong lĩnh vực tính toán sinh học. Nhiều sách và tài liệu trên mạng nói về nó và ở một vài chỗ còn có code cài đặt. Tuy nhiên, tôi vẫn cảm thấy là vẫn chưa đủ và code cài đặt không hề dễ để đưa vào sử dụng. Vậy nên bài viết này sẽ cố gằng để thu hẹp khoảng cách giữa lý thuyết và ứng dụng thực tế. Chúng ta sẽ cùng nhau tìm hiều về giải thuật dụng cây hậu tố có tên là Ukkonen. Ta sẽ đi chi tiết từng bước một nhiều phần từ lý thuyết đến cài đặt. Bắt đầu từ phương pháp "dùng sức" để hiểu rõ những khái niệm và mẹo trong giải thuật Ukkonen. Và cuối cùng ta sẽ thực hiện cài đặt giải thuật này.
+
+
 ## 3. Xây dựng suffix tree
+
+### a. Dựng cây hậu tố bằng "sức".
+### b. Dựng cây hậu tố bằng giải thuật Ukkonen.
+Để có thể hiểu rõ giải thuật xây dựng cây hậu tố O(n) chúng ta sẽ đi từng bước một. Xử lý từ chuỗi đơn giản nhất, chuỗi không lặp, dần dần đến chuỗi phức tạp hơn. Ta hãy bắt đầu từ những khái niệm cơ bản.
+
+1. Thứ chúng ta xây dựng gần giống như trie. Sẽ có một nút gốc (root), từ nút gốc sẽ có những cạnh nối đến các nút mới và cứ đi tiếp như thế cho đến nút lá.
+2. Thứ chúng ta xây dựng không hoàn toàn giống với trie. Các cạnh sẽ không được biểu diễn bằng ký tự (trie) hay chuỗi ký tự ( trie nén) mà sẽ bằng một cặp số [start,end] là vị trí đầu và cuối của chuỗi con trong văn bản *text*. Đây là cách để tiết kiệm không gian lưu trữ khi chũng ta chỉ hoạt động trên đúng một text. Ta sẽ thấy cách biểu diễn rất hữu ích khi chạy giải thuật Ukkonen.
+3. Ta cần nhớ một điều. Tư tưởng chính của giải thuật Ukkonen là đệ quy. Tư tưởng này có thể hoàn toàn trái ngược với cách dùng "sức" mà ta dễ dàng nghĩ ra. Nhiệm vụ ở đây rất đơn giản, giả sử bạn đã có cây nhị phân cho chuỗi tiền số *text[0...i]* giờ hãy xây dựng cây nhị phân cho chuỗi tiền tố *text[0...i+1]*. Đó là ý tưởng, còn làm thế nào thì ta sẽ bắt đầu ngay sau đây.
+
+#### Chuỗi không lặp
+
+Giờ ta hãy bắt đầu với chuỗi
+>`abc`
+Như đã nói, giờ ta sẽ bắt đầu xây dựng từ chuỗi tiền tố `a` trước. Ta sẽ tạo một cạnh [0,#], # ở đây đại diện cho vị trí ký tự cuối cùng ở thời điểm hiện tại, ở đây nó là 1. Có thể hiểu là các ký tự từ 0 đến nhỏ hơn 1, ở đây là `a`.
+Ta sẽ khởi tạo cây:
+
+![a_suffixtree](a_suffixtree.png)
+
+Biểu diễn cho:
+
+![a_suffixtree_true](a_suffixtree_true.png)
+
+Giờ ta sẽ thêm `b` vào để xây dựng cây hậu tố cho chuỗi `ab`.
+Những việc ta cần làm đó là.
+1. Mở rộng cạnh `a` đã có thành cạnh `ab`.
+2. Thêm một cạnh `b` vào cấu trúc trie.
+
+Cây hậu tố mới sẽ là.
+
+![ab_suffixtree](ab_suffixtree.png)
+
+Biểu diễn cho:
+
+![ab_suffixtree_true](ab_suffixtree_true.png)
+
+Đến đây ta có thể đã nhận ra vài thứ
+* Việc biểu diễn cạnh `ab` bằng một cặp số [0,#] vẫn được giữ lại như ở cây hậu tố trước đó. Nó chỉ khác là giá trị của # đã được cập nhật từ 1 lên thành 2. 
+* Không cần biết là có bao nhiêu ký tự, khi sử dụng một cặp số để biểu diễn cạnh, ta luôn luôn chỉ tốn O(1) cho việc lưu trữ.
+
+Ta lại tiếp tục tăng vị trí hiện tại lên để thêm ký tự cuối cùng `c` vào các cạnh đã có  và sau đó thêm cạnh mới `c`. Ta thu được cây hậu tố mới.
+
+Cây hậu tố mới sẽ là.
+
+![abc_suffixtree](abc_suffixtree.png)
+
+Biểu diễn cho:
+
+![abc_suffixtree_true](abc_suffixtree_true.png)
+
+Giờ tổng hợp lại ta thấy gì:
+* Dựng cây đến đâu thì chúng ta cập nhật vị trí hiện tại # tới đó.
+* Số bước cũng chính bằng chiều dài của chuỗi *text*
+* Ở mỗi bước ta chỉ thực hiện đúng 2 việc là cập nhật # và thêm cạnh mới vào. Mỗi thao tác tiêu tốn O(1). Như vậy chi phí để hoàn thành cây hậu tố cho chuỗi *text* dài n là O(n).
+
+#### Mở rộng thứ nhất: chuỗi lặp đơn giản.
+
+Đương nhiên trong thực tế ta sẽ hiếm khi gặp được chuỗi đơn giản như ở phần trước. Thực tế sẽ trông như thế này.
+
+>`abcabxabcd`
+
+Ta sẽ dựng cây hậu tố cho chuỗi trên từng bước.
+
+**Bước 1-3**: Ta thực hiện như phần trước để được cây sau:
+
+![abc_suffixtree](abc_suffixtree.png)
+
+**Bước 4**:
 
 ## Tham khảo
 1. [Pattern Searching | Set 8 (Suffix Tree Introduction)](https://www.geeksforgeeks.org/pattern-searching-set-8-suffix-tree-introduction/)
+2. [Ukkonen's suffix tree algorithm in plain English](https://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english)
