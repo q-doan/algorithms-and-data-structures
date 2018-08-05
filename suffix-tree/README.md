@@ -121,7 +121,24 @@ Ta sẽ dựng cây hậu tố cho chuỗi trên từng bước.
 
 ![abc_suffixtree](abc_suffixtree.png)
 
-**Bước 4**:
+**Bước 4**: Đầu tiên ta sẽ tăng vị trí hiện tại # lên một, để có được cây mới biểu diển cho
+![abca_suffixtree](abca_suffixtree_true.png)
+
+Việc tiếp theo ta sẽ thêm cạnh mới là `a` vào gốc `root`. Trước khi làm điều đó, ta cần thêm một biến phụ bên cạnh #. Ta sẽ gọi nó là `active point`, gồm bộ ba giá trị `(active_node, active_edge, active_length)`. Ta sẽ thấy rõ tác dụng của nó sau, hiện tại chỉ cần biết rằng trong trường hợp `abc` thì `active point` luôn luôn là `(root,'\0x',0)` với ý nghĩa `active_node` là root, `active_edge` là một ký tự null `'\0x'` và `active_length` là không.
+
+Quay trở lại với việc thêm cạnh `a` vào gốc. Để ý rằng ta đã có sẵn cạnh `a`, nằm trên `abca` đi ra từ nút gốc. Để xử lý trường hợp này việc chúng ta sẽ làm là
+* Ta không thêm cạnh mới [4,#] vào nút gốc. Ta chỉ để ý rằng hậu tố `a` đã có sẵn và cạnh của nó kết thúc ở đâu đó trên cây. Chúng ta sẽ không làm gì với cây hậu tố.
+* Biến `active point` sẽ được cập nhật lại thành `(root,'a',1)`, hàm ý là `active point` bắt đầu từ nút gốc, đang nằm ở giữa một cạnh nào đó bắt đầu với ký tự `a` và nằm sau vị trí 1 trên cạnh đó. Chú ý rằng ở đây ta chỉ cần biết ký tự đầu tiên để đại diện cho một cạnh bởi vì những cạnh khác nhau sẽ bắt đầu với những ký tự khác nhau.
+
+**Quan sát**: Khi một hậu tố cần thêm vào đã có sẵn trên cây thì ta sẽ không động chạm gì đến nó mà chỉ thay đổi giá trị của `active point`. Cây này không phải là cây hậu tố đùng nghĩa nhưng nó chứa hết tất cả các hậu tố. Ta gọi đây là cây hậu tố không tường minh hay implicit suffix tree. Hầu như công việc phải làm chỉ là cập nhật lại `active point` nên chi phí cần bỏ ra cho thao tác này là O(1).
+
+**Bước 5**: Như thường lệ, ta tăng vị trí hiện tại lên # để thu được câu hậu tố
+
+![abcab_suffixtree](abcab_suffixtree_true.png)
+
+
+
+
 
 ## Tham khảo
 1. [Pattern Searching | Set 8 (Suffix Tree Introduction)](https://www.geeksforgeeks.org/pattern-searching-set-8-suffix-tree-introduction/)
