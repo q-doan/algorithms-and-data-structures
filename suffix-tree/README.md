@@ -136,7 +136,8 @@ Quay trở lại với việc thêm cạnh `a` vào gốc. Để ý rằng ta đ
 
 ![abcab_suffixtree](abcab_suffixtree_true.png)
 
-
+Có thể thấy ta cần thêm hai hậu tố mới là `ab` và `a` vào cây trên.
+*  
 
 
 
